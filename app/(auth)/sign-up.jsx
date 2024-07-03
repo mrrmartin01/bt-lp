@@ -1,7 +1,7 @@
-import { View, Text, ScrollView, Image } from "react-native";
+import { View, Text, ScrollView, Image, Alert } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 
 import { images } from "../../constants";
 import FormField from "../../components/FormField";
@@ -15,11 +15,29 @@ const SignUp = () => {
     password: "",
   });
 
-  const [isSunmitting, setIsSunmitting] = useState(false);
+  console.log(form.email);
 
-  const submit = () => {
-    createUser();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const submit = async () => {
+    if (!form.username || !form.password || !form.email) {
+      Alert.alert("Error", "Please enter a username and password");
+    }
+    setIsSubmitting(true);
+
+    try {
+      const result = await createUser(form.username, form.email, form.password);
+      //set it to a global state...
+
+      router.replace("/home");
+    } catch (error) {
+      console.log(error);
+      throw Error(error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
   return (
     <SafeAreaView className="bg-primary h-full">
       <ScrollView>
@@ -53,10 +71,10 @@ const SignUp = () => {
           />
 
           <CustomButton
-            title={"Sign in"}
+            title={"Sign up"}
             handlePress={submit}
             containerStyles={"mt-7"}
-            isLoading={isSunmitting}
+            isLoading={isSubmitting}
           />
 
           <View className="justify-center pt-5 flex-row gap-2">
